@@ -58,6 +58,32 @@ private:
     Bike bike;
 public:
 };
+
+class BikeRental {
+private:
+public:
+    void showMainMenu();
+
+};
+
+void BikeRental::showMainMenu() {
+    int choice=5;
+    while (choice!=0) {
+        cout << "----------MENÜ-----------" << endl;
+        cout << "[1] Kundenverwaltung" << endl;
+        cout << "[2] Reservierungen" << endl;
+        cout << "[0] Beenden" << endl;
+        cout << "--------------------------" << endl;
+        cout << endl << "Ihre Auswahl:";
+        cin >> choice;
+
+        if (choice==1) {
+
+        } else if (choice==2) {
+
+        }
+    }
+}
 int main() {
     std::cout << "Hello, World!" << std::endl;
     return 0;
