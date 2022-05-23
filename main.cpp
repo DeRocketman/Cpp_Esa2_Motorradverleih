@@ -19,9 +19,19 @@ private:
     int yearBirth;
     string phone;
     bool hasLicence;
-
 public:
+
+    friend istream& operator>>(istream& is, Customer& customer);
+    friend ostream& operator<<(ostream& os, const Customer& customer);
 };
+
+istream &operator>>(istream& is, Customer &customer) {
+    return is;
+}
+
+ostream& operator<<(ostream& os, const Customer& customer) {
+    return os;
+}
 
 class Date {
 private:
