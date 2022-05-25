@@ -11,8 +11,30 @@ private:
     string zip;
     string city;
     string country;
-
+public:
+    friend istream& operator>>(istream& is, Address& address);
+    friend ostream& operator<<(ostream& os, const Address& address);
 };
+
+istream &operator>>(istream& is, Address &address) {
+    cout << "Adressdaten eingeben: " << endl;
+    cout << "Straße: ";
+    is >> address.street;
+    cout << "Hausnummer: ";
+    is >> address.number;
+    cout << "Postleitzahl: ";
+    is >> address.zip;
+    cout << "Stadt: ";
+    is >> address.city;
+    cout << "Land: ";
+    is >> address.country;
+    return is;
+}
+
+ostream& operator<<(ostream& os, const Address& address) {
+    os << address.street << " " << address.number << " " << address.zip << " " << address.city << " " << address.country;
+    return os;
+}
 
 class Customer {
 private:
@@ -32,10 +54,24 @@ public:
 };
 
 istream &operator>>(istream& is, Customer &customer) {
+    cout << "Kundendaten eingeben: " << endl;
+    cout << "Vorname: ";
+    is >> customer.firstName;
+    cout << "Name: ";
+    is >> customer.name;
+    is >> customer.address;
+    cout << "Geburtsjahr: ";
+    is >> customer.yearBirth;
+    cout << "Telefonnummer: ";
+    is >> customer.phone;
+    cout << "Besitzt Fahrerlaubnis Kl. A? [1]ja / [0]nein";
+    is >> customer.hasLicence;
     return is;
 }
 
 ostream& operator<<(ostream& os, const Customer& customer) {
+    os << customer.name << " " << customer.firstName << " " << customer.address << " " << customer.yearBirth << " "
+       << customer.phone << " " << customer.hasLicence << endl;
     return os;
 }
 
@@ -46,6 +82,8 @@ private:
     int day;
 public:
     Date(int y, int m, int d): year(y), month(m), day(d) {};
+    friend istream& operator>>(istream& is, Date& date);
+    friend ostream& operator<<(ostream& os, const Date& date);
 
     int getDay() const {
         return day;
@@ -59,6 +97,22 @@ public:
         return year;
     }
 };
+
+istream &operator>>(istream& is, Date &date) {
+    cout << "Bitte Datum eingeben: " << endl;
+    cout << endl << "Tag: ";
+    is >> date.day;
+    cout << "Monat: ";
+    is >> date.month;
+    cout << "Jahr: ";
+    is >> date.year;
+    return is;
+}
+
+ostream& operator<<(ostream& os, const Date& date) {
+    os << date.day << "." << date.month << "." << date.year;
+    return os;
+}
 
 class Bike {
 private:
