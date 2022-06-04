@@ -16,28 +16,40 @@ public:
 };
 
 istream &operator>>(istream& is, Address &address) {
-    cout << "Adressdaten eingeben: " << endl;
-    cout << "Straße: ";
-    do {
+    if (&is == &cin) {
+        cout << "Adressdaten eingeben: " << endl;
+        cout << "Straße: ";
+        do {
+            getline(is, address.street);
+        } while (address.street.empty());
+        cout << "Hausnummer: ";
+        do {
+            getline(is, address.number);
+        } while (address.number.empty());
+        cout << "Postleitzahl: ";
+        do {
+            getline(is, address.zip);
+        } while (address.zip.empty());
+        cout << "Stadt: ";
+        do {
+            getline(is, address.city);
+        } while (address.city.empty());
+    } else {
         getline(is, address.street);
-    } while (address.street.empty());
-    cout << "Hausnummer: ";
-    do {
         getline(is, address.number);
-    } while (address.number.empty());
-    cout << "Postleitzahl: ";
-    do {
         getline(is, address.zip);
-    } while (address.zip.empty());
-    cout << "Stadt: ";
-    do {
         getline(is, address.city);
-    } while (address.city.empty());
+    }
     return is;
 }
 
 ostream& operator<<(ostream& os, const Address& address) {
-    os << address.street << endl << address.number << endl << address.zip << endl << address.city << endl;
+    if (&os == &cout) {
+        os << address.street << " " << address.number << " " << address.zip << " " << address.city << " ";
+    } else {
+        os << address.street << endl << address.number << endl << address.zip << endl << address.city << endl;
+    }
+
     return os;
 }
 
@@ -68,57 +80,62 @@ public:
 };
 
 istream &operator>>(istream& is, Customer &customer) {
-    cout << "Kundendaten eingeben: " << endl;
-    cout << "Vorname: ";
-    do {
-        getline(is, customer.firstName);
-    } while (customer.firstName.empty());
+    if (&is == &cin) {
+        cout << "Kundendaten eingeben: " << endl;
+        cout << "Vorname: ";
+        do {
+            getline(is, customer.firstName);
+        } while (customer.firstName.empty());
 
-    cout << "Name: ";
-    do {
-        getline(is, customer.name);
-    } while (customer.name.empty());
-    is >> customer.address;
-    cout << "Geburtsjahr: ";
-    do {
-        try {
-            is >> customer.yearBirth;
-            if(is.fail()) {
-                throw 1;
+        cout << "Name: ";
+        do {
+            getline(is, customer.name);
+        } while (customer.name.empty());
+        is >> customer.address;
+        cout << "Geburtsjahr: ";
+        do {
+            try {
+                is >> customer.yearBirth;
+                if (customer.yearBirth > 2004) {
+                    throw 1;
+                }
+            } catch (int err) {
+                if (err==1) {
+                    cout << "Leider ist der Kunde noch zu jung! Vorgang wird abgebrochen!" << endl ;
+                    customer.hasLicence = false;
+                    return  is;
+                }
             }
-            if (customer.yearBirth > 2004) {
-                throw 2;
-            }
-        } catch (int err) {
-            if (err==1) {
-                cout << "Bitte eine Zahl eingeben";
-                customer.yearBirth = 0;
-            }
-            if (err==2) {
-                cout << "Leider ist der Kunde noch zu jung! Vorgang wird abgebrochen" << endl ;
-                customer.hasLicence = false;
-                return  is;
-            }
+        } while (customer.yearBirth == 0);
+        cout << "Telefonnummer: ";
+        do {
+            getline(is, customer.phone);
+        } while (customer.phone.empty());
+        cout << "Besitzt Fahrerlaubnis Kl. A? [1]ja / [0]nein:" << endl;
+        is >> customer.hasLicence;
+        if (customer.hasLicence) {
+            cout << "Hat bereits ein Motorrad reserviert? [1]ja / [0]nein:" << endl;
+            is >> customer.hasReserved;
+        } else {
+            cout << "Kunden müssen eine Fahrerlaubnis der Klasse A haben! Vorgang wird abgebrochen!" << endl;
         }
-    } while (customer.yearBirth == 0);
-    cout << "Telefonnummer: ";
-    do {
-        getline(is, customer.phone);
-    } while (customer.phone.empty());
-    cout << "Besitzt Fahrerlaubnis Kl. A? [1]ja / [0]nein:" << endl;
-    is >> customer.hasLicence;
-    if (customer.hasLicence) {
-        cout << "Hat bereits ein Motorrad reserviert? [1]ja / [0]nein:" << endl;
-        is >> customer.hasReserved;
     } else {
-        cout << "Kunden müssen eine Fahrerlaubnis der Klasse A haben! Vorgang wird abgebrochen!" << endl;
+        getline(is, customer.firstName);
+        getline(is, customer.name);
+        is >> customer.address;
+        is >>customer.yearBirth;
+        getline(is, customer.phone);
+        is >> customer.hasLicence;
+        is >> customer.hasReserved;
     }
     return is;
 }
 
 ostream& operator<<(ostream& os, const Customer& customer) {
-    os << customer.name << endl << customer.firstName << endl << customer.address << endl << customer.yearBirth << endl
-       << customer.phone << endl << customer.hasLicence << endl << customer.hasReserved << endl;
+    if (&os == &cout) {
+        os << customer.name << " " << customer.firstName << " " << customer.address << customer.yearBirth << " "
+           << customer.phone << " " << customer.hasLicence << " " << customer.hasReserved << endl;
+    }
     return os;
 }
 
@@ -143,37 +160,56 @@ public:
 };
 
 istream &operator>>(istream& is, Bike &bike) {
-    cout << "Bitte geben Sie die Daten für das Motorrad ein: " << endl;
-    cout << endl << "Kennzeichen: ";
-    is >> bike.registrationNumber;
-    cout << "Type: ";
-    is >> bike.type;
-    cout << "Ist Motorrad schon verliehen oder reserviert? [1]ja / [0]nein";
-    is >> bike.isReserved;
+    if (&is == &cin) {
+        cout << "Bitte geben Sie die Daten für das Motorrad ein: " << endl;
+        cout << endl << "Kennzeichen: ";
+        is >> bike.registrationNumber;
+        cout << "Type: ";
+        is >> bike.type;
+        cout << "Ist Motorrad schon verliehen oder reserviert? [1]ja / [0]nein";
+        is >> bike.isReserved;
+    } else {
+        is >> bike.registrationNumber;
+        is >> bike.isReserved;
+    }
     return is;
 }
 
 ostream& operator<<(ostream& os, const Bike& bike) {
-    os << bike.registrationNumber << " "<< bike.type << " " << bike.isReserved << endl;
+    os << bike.registrationNumber << " " << bike.type << " " << bike.isReserved << endl;
     return os;
 }
 
 class Reservation {
 private:
     int id;
-    Customer customer;
-    Bike bike;
+    string customerFirstName;
+    string customerName;
+    string bikeType;
 public:
     friend istream& operator>>(istream& is, Reservation& reservation);
     friend ostream& operator<<(ostream& os, const Reservation& reservation);
 };
 
 istream &operator>>(istream& is, Reservation &reservation) {
+    if (&is == &cin) {
+        cout << "Bitte ID eingeben";
+        is >> reservation.id;
+    } else {
+        is >> reservation.id;
+        getline(is, reservation.customerFirstName);
+        getline(is, reservation.customerName);
+        getline(is, reservation.bikeType);
+    }
     return is;
 }
 
 ostream& operator<<(ostream& os, const Reservation& reservation) {
-    os << reservation.id << " " << reservation.customer.getFirstName() << reservation.customer.getName()<< " " << reservation.bike << endl;
+    if (&os == &cout) {
+        os << reservation.id << " " << reservation.customerFirstName << " " << reservation.customerName << " " << reservation.bikeType << endl;
+    } else {
+        os << reservation.id << endl << reservation.customerFirstName << endl << reservation.customerName << endl << reservation.bikeType << endl;
+    }
     return os;
 }
 class BikeRental {
@@ -192,6 +228,7 @@ public:
     void editCustomerData();
     void deleteCustomerData();
     void showAllCustomersData();
+    Customer searchCustumer(const string& customerFirstName, const string& customerName);
     void createNewReservation();
     void editReservation();
     void showAllReservations();
@@ -200,8 +237,7 @@ public:
 void BikeRental::showMainMenu() {
     int choice=5;
 
-    readDataFromFile(1);
-    readDataFromFile(2);
+    //readDataFromFile(2);
     readDataFromFile(3);
 
     while (choice!=0) {
@@ -221,7 +257,10 @@ void BikeRental::showMainMenu() {
         } else if (choice==3) {
             showBikeManagement();
         } else if (choice==0) {
-                cout << "Programm wird beendet" << endl;
+            writeDataToFile(1);
+            writeDataToFile(2);
+            writeDataToFile(3);
+            cout << "Programm wird beendet" << endl;
         }
     }
 }
@@ -234,6 +273,11 @@ void BikeRental::readDataFromFile(int fileId) {
         if (readReservationFile.fail()) {
             cout << "Keine Reservierungen vorhanden" << endl;
         } else {
+            Reservation tempReservation;
+            while(!readBikeFile.eof()) {
+                readReservationFile >> tempReservation;
+                reservations.push_back(tempReservation);
+            }
         }
     } else if (fileId == 2) {
         if (readBikeFile.fail()) {
@@ -253,17 +297,28 @@ void BikeRental::readDataFromFile(int fileId) {
                 }
             }
         } else {
-
+            Bike tempBike;
+            while(!readBikeFile.eof()) {
+                readBikeFile >> tempBike;
+                bikes.push_back(tempBike);
+            }
         }
     } else {
-
+        if (readCustomerFile.fail()) {
+            cout << "Keine Kundendaten vorhanden!" << endl;
+        } else {
+            Customer tempCustomer;
+            while(readCustomerFile >> tempCustomer) {
+                customers.push_back(tempCustomer);
+            }
+        }
     }
 }
 
 void BikeRental::writeDataToFile(int fileId) {
-    ofstream writeReservationFile("reservierungen.txt");
-    ofstream writeBikeFile("bikes.txt");
-    ofstream writeCustomerFile("kunden.txt");
+    ofstream writeReservationFile("reservierungen.txt", ios::app);
+    ofstream writeBikeFile("bikes.txt",ios::app);
+    ofstream writeCustomerFile("kunden.txt", ios::app);
 
     if (fileId==1) {
         for (const auto& reservation: reservations) {
@@ -290,7 +345,7 @@ void BikeRental::showCustomerManagement() {
         cout << "[4] Alle Datensätze anzeigen" << endl;
         cout << "[0] Beenden und zur\x9A \bck gehen" << endl;
         cout << "-------------------------------------" << endl;
-        cout << endl << "Ihre Auswahl:";
+        cout << endl << "Ihre Auswahl: ";
         cin >> choice;
 
         if (choice==1) {
@@ -337,11 +392,23 @@ void BikeRental::createNewCustomer() {
     }
 }
 
-void BikeRental::editCustomerData() {}
+void BikeRental::editCustomerData() {
+
+}
 
 void BikeRental::deleteCustomerData() {}
 
 void BikeRental::showAllCustomersData() {}
+
+Customer BikeRental::searchCustumer(const string& customerFirstName, const string& customerName) {
+    for (const auto& customer: customers) {
+        if (customerName == customer.getName() && customerFirstName == customer.getFirstName()) {
+            return customer;
+        }
+    }
+    Customer fail;
+    return fail;
+}
 
 void BikeRental::showReservationManagement() {
     int choice=6;
