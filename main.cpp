@@ -123,7 +123,7 @@ istream &operator>>(istream& is, Customer &customer) {
         getline(is, customer.firstName);
         getline(is, customer.name);
         is >> customer.address;
-        is >>customer.yearBirth;
+        is >> customer.yearBirth;
         getline(is, customer.phone);
         is >> customer.hasLicence;
         is >> customer.hasReserved;
@@ -135,6 +135,9 @@ ostream& operator<<(ostream& os, const Customer& customer) {
     if (&os == &cout) {
         os << customer.name << " " << customer.firstName << " " << customer.address << customer.yearBirth << " "
            << customer.phone << " " << customer.hasLicence << " " << customer.hasReserved << endl;
+    } else {
+        os << customer.name << endl << customer.firstName << endl << customer.address << customer.yearBirth << endl
+           << customer.phone << endl << customer.hasLicence << endl << customer.hasReserved << endl;
     }
     return os;
 }
@@ -163,20 +166,29 @@ istream &operator>>(istream& is, Bike &bike) {
     if (&is == &cin) {
         cout << "Bitte geben Sie die Daten für das Motorrad ein: " << endl;
         cout << endl << "Kennzeichen: ";
-        is >> bike.registrationNumber;
+        do {
+            getline(is, bike.registrationNumber);
+        } while(bike.registrationNumber.empty());
         cout << "Type: ";
-        is >> bike.type;
+        do {
+            getline(is, bike.type);
+        } while(bike.type.empty());
         cout << "Ist Motorrad schon verliehen oder reserviert? [1]ja / [0]nein";
         is >> bike.isReserved;
     } else {
-        is >> bike.registrationNumber;
+        getline(is, bike.registrationNumber);
+        getline(is,bike.type);
         is >> bike.isReserved;
     }
     return is;
 }
 
 ostream& operator<<(ostream& os, const Bike& bike) {
-    os << bike.registrationNumber << " " << bike.type << " " << bike.isReserved << endl;
+    if (&os == &cout) {
+        os << bike.registrationNumber << " " << bike.type << " " << bike.isReserved << endl;
+    } else {
+        os << bike.registrationNumber << endl << bike.type << endl << bike.isReserved << endl;
+    }
     return os;
 }
 
@@ -228,7 +240,7 @@ public:
     void editCustomerData();
     void deleteCustomerData();
     void showAllCustomersData();
-    Customer searchCustumer(const string& customerFirstName, const string& customerName);
+    Customer searchCustomer(const string& customerFirstName, const string& customerName);
     void createNewReservation();
     void editReservation();
     void showAllReservations();
@@ -236,7 +248,7 @@ public:
 
 void BikeRental::showMainMenu() {
     int choice=5;
-
+    //readDataFromFile(1);
     //readDataFromFile(2);
     readDataFromFile(3);
 
@@ -257,9 +269,6 @@ void BikeRental::showMainMenu() {
         } else if (choice==3) {
             showBikeManagement();
         } else if (choice==0) {
-            writeDataToFile(1);
-            writeDataToFile(2);
-            writeDataToFile(3);
             cout << "Programm wird beendet" << endl;
         }
     }
@@ -274,8 +283,7 @@ void BikeRental::readDataFromFile(int fileId) {
             cout << "Keine Reservierungen vorhanden" << endl;
         } else {
             Reservation tempReservation;
-            while(!readBikeFile.eof()) {
-                readReservationFile >> tempReservation;
+            while(readBikeFile >> tempReservation) {
                 reservations.push_back(tempReservation);
             }
         }
@@ -298,18 +306,20 @@ void BikeRental::readDataFromFile(int fileId) {
             }
         } else {
             Bike tempBike;
-            while(!readBikeFile.eof()) {
-                readBikeFile >> tempBike;
+            while(readBikeFile >> tempBike) {
                 bikes.push_back(tempBike);
+                cout << tempBike;
             }
         }
     } else {
         if (readCustomerFile.fail()) {
             cout << "Keine Kundendaten vorhanden!" << endl;
         } else {
+            cout << "Lese Kundendaten ein" << endl;
             Customer tempCustomer;
             while(readCustomerFile >> tempCustomer) {
                 customers.push_back(tempCustomer);
+                cout << tempCustomer;
             }
         }
     }
@@ -364,7 +374,7 @@ void BikeRental::showCustomerManagement() {
 
 void BikeRental::createNewCustomer() {
     bool isCustomerKnown = false;
-    int choice = 1;
+    int choice = -1;
     Customer tempCustomer;
     cin >> tempCustomer;
 
@@ -387,6 +397,7 @@ void BikeRental::createNewCustomer() {
             if (choice == 1) {
                 customers.push_back(tempCustomer);
                 writeDataToFile(3);
+                cout << tempCustomer;
             }
         }
     }
@@ -398,9 +409,14 @@ void BikeRental::editCustomerData() {
 
 void BikeRental::deleteCustomerData() {}
 
-void BikeRental::showAllCustomersData() {}
+void BikeRental::showAllCustomersData() {
+    cout << "Alle Kunden:" << endl;
+    for (const auto& customer: customers) {
+        cout << customer;
+    }
+}
 
-Customer BikeRental::searchCustumer(const string& customerFirstName, const string& customerName) {
+Customer BikeRental::searchCustomer(const string& customerFirstName, const string& customerName) {
     for (const auto& customer: customers) {
         if (customerName == customer.getName() && customerFirstName == customer.getFirstName()) {
             return customer;
@@ -432,32 +448,40 @@ void BikeRental::showReservationManagement() {
 }
 
 void BikeRental::createNewReservation() {
-    int i = 0;
+    int i = 1;
     int choice = -1;
+    bool error = true;
     Bike tempBike;
-    cout << "-------Neue Reservierung-------" << endl;
-    cout << "I. Bike auswählen" << endl;
-    for (const auto& bike : bikes) {
-        cout << i << ") " << bike << endl;
-        i++;
-    }
-    cout << endl << "Ihre Auswahl:";
-    cin >> choice;
+    while (error || choice==0) {
+        cout << "-------Neue Reservierung-------" << endl;
+        cout << "I. Bike auswählen" << endl;
+        for (const auto& bike : bikes) {
+            cout << i << ") " << bike << endl;
+            i++;
+        }
+        cout << "[0] Reservierungsvorgang abbrechen" <<endl;
+        cout << endl << "Ihre Auswahl:";
+        cin >> choice;
 
-    for (const auto& bike : bikes) {
-        if (choice == i) {
-            if (!bike.getIsReserved()) {
-                tempBike = bike;
-                break;
+        for (const auto& bike : bikes) {
+            if (choice == i) {
+                if (!bike.getIsReserved()) {
+                    tempBike = bike;
+                    error = false;
+                    break;
+                } else {
+                    cout << "Motorrad ist schon reserviert" << endl;
+                    cout << "Bitte ein anderen wählen" << endl;
+                    choice = -1;
+                    error = true;
+                }
             } else {
-                cout << "Motorrad ist schon reserviert";
-                choice = -1;
+                i--;
             }
-        } else {
-            i--;
         }
     }
 
+    cout << "II. Kundendaten" << endl;
 }
 void BikeRental::showBikeManagement() {}
 
