@@ -283,7 +283,7 @@ void BikeRental::readDataFromFile(int fileId) {
             cout << "Keine Reservierungen vorhanden" << endl;
         } else {
             Reservation tempReservation;
-            while(readBikeFile >> tempReservation) {
+            while(readReservationFile >> tempReservation) {
                 reservations.push_back(tempReservation);
             }
         }
